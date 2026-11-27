@@ -378,25 +378,80 @@
       article.appendChild(btn);
       article.appendChild(panel);
       rows.appendChild(article);
+    });
 
-      btn.addEventListener("click", function () {
-        var open = btn.getAttribute("aria-expanded") === "true";
-        var parent = wrap;
-        parent.querySelectorAll(".fichaTec__rowHead").forEach(function (other) {
-          other.setAttribute("aria-expanded", "false");
+    function isRowOpen(row) {
+      var head = row.querySelector(".fichaTec__rowHead");
+      return head && head.getAttribute("aria-expanded") === "true";
+    }
+
+    function closeRow(row) {
+      var head = row.querySelector(".fichaTec__rowHead");
+      var panelEl = row.querySelector(".fichaTec__rowPanel");
+      var innerEl = row.querySelector(".fichaTec__rowPanelInner");
+      if (!head || !panelEl) return;
+      if (!isRowOpen(row)) {
+        panelEl.style.maxHeight = "0px";
+        panelEl.setAttribute("hidden", "");
+        return;
+      }
+      head.setAttribute("aria-expanded", "false");
+      panelEl.classList.remove("is-open");
+      var h = innerEl ? innerEl.scrollHeight : panelEl.scrollHeight;
+      panelEl.removeAttribute("hidden");
+      panelEl.style.maxHeight = h + "px";
+      panelEl.offsetHeight;
+      panelEl.style.maxHeight = "0px";
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        panelEl.setAttribute("hidden", "");
+        panelEl.removeEventListener("transitionend", onEnd);
+        if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
+      }
+      function onEnd(ev) {
+        if (ev.target !== panelEl) return;
+        if (ev.propertyName && ev.propertyName !== "max-height") return;
+        finish();
+      }
+      panelEl.addEventListener("transitionend", onEnd);
+      setTimeout(finish, 520);
+    }
+
+    function openRow(row) {
+      var head = row.querySelector(".fichaTec__rowHead");
+      var panelEl = row.querySelector(".fichaTec__rowPanel");
+      var innerEl = row.querySelector(".fichaTec__rowPanelInner");
+      if (!head || !panelEl || !innerEl) return;
+      panelEl.removeAttribute("hidden");
+      panelEl.style.maxHeight = "0px";
+      head.setAttribute("aria-expanded", "true");
+      panelEl.classList.add("is-open");
+      panelEl.offsetHeight;
+      panelEl.style.maxHeight = innerEl.scrollHeight + "px";
+      if (typeof ScrollTrigger !== "undefined") ScrollTrigger.refresh();
+    }
+
+    rows.querySelectorAll(".fichaTec__row").forEach(function (row) {
+      var head = row.querySelector(".fichaTec__rowHead");
+      if (!head) return;
+      head.addEventListener("click", function () {
+        var wasOpen = isRowOpen(row);
+        rows.querySelectorAll(".fichaTec__row").forEach(function (other) {
+          if (other !== row) closeRow(other);
         });
-        parent.querySelectorAll(".fichaTec__rowPanel").forEach(function (otherPanel) {
-          otherPanel.classList.remove("is-open");
-          otherPanel.hidden = true;
-        });
-        if (!open) {
-          btn.setAttribute("aria-expanded", "true");
-          panel.hidden = false;
-          panel.classList.add("is-open");
-        }
-        if (typeof ScrollTrigger !== "undefined") {
-          ScrollTrigger.refresh();
-        }
+        if (wasOpen) closeRow(row);
+        else openRow(row);
+      });
+    });
+
+    window.addEventListener("resize", function () {
+      rows.querySelectorAll(".fichaTec__row").forEach(function (row) {
+        if (!isRowOpen(row)) return;
+        var panelEl = row.querySelector(".fichaTec__rowPanel");
+        var innerEl = row.querySelector(".fichaTec__rowPanelInner");
+        if (panelEl && innerEl) panelEl.style.maxHeight = innerEl.scrollHeight + "px";
       });
     });
 

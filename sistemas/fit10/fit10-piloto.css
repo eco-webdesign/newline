@@ -598,9 +598,21 @@ button { font: inherit; }
   background: rgba(23, 21, 21, 0.06);
   color: var(--nlStudioInk);
   border: 1px solid rgba(23, 21, 21, 0.14);
+  border-radius: 999px;
   font-size: 15px;
   font-weight: 400;
   text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.fichaTec__rowHead:hover .fichaTec__rowLabel,
+.fichaTec__rowHead:focus-visible .fichaTec__rowLabel {
+  background: rgba(23, 21, 21, 0.1);
+}
+
+.fichaTec__rowHead[aria-expanded="true"] .fichaTec__rowLabel {
+  background: color-mix(in srgb, var(--accent, #F6C65B) 22%, transparent);
+  border-color: var(--accent, #F6C65B);
 }
 
 .fichaTec__rowPanel {
@@ -609,8 +621,8 @@ button { font: inherit; }
   transition: max-height 0.45s cubic-bezier(.22, .85, .32, 1);
 }
 
-.fichaTec__rowPanel.is-open {
-  max-height: 720px;
+@media (prefers-reduced-motion: reduce) {
+  .fichaTec__rowPanel { transition: none; }
 }
 
 .fichaTec__rowPanelInner {
