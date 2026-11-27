@@ -346,10 +346,57 @@ button { font: inherit; }
 
 #fit10Sistema .pdtHero__nav a:hover { color: var(--accent); }
 
+/* Scroll cue (Orchestrated-style wave) — centralizado no banner */
+#fit10Sistema .pdtHero__scrollCue {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+#fit10Sistema .pdtHero__scrollCue.is-visible {
+  opacity: 1;
+}
+
+#fit10Sistema .pdtHero__scrollCue.is-fading {
+  opacity: 0;
+}
+
+#fit10Sistema .pdtHero__scrollCueLabel {
+  font-family: var(--fontBase);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  white-space: nowrap;
+  margin: 0 0 10px;
+}
+
+#fit10Sistema .pdtHero__scrollCueWave {
+  display: block;
+  width: 2rem;
+  height: 45px;
+}
+
 @media (max-width: 768px) {
   #fit10Sistema .pdtHero { height: auto; min-height: 520px; }
   #fit10Sistema .pdtHero__title { font-size: 34px; }
   #fit10Sistema .pdtHero__nav { display: none; }
+  #fit10Sistema .pdtHero__scrollCueLabel {
+    font-size: 12px;
+    white-space: normal;
+    max-width: 220px;
+  }
+  #fit10Sistema .pdtHero__scrollCue { bottom: 20px; }
 }
 
 /* Stage 3D */

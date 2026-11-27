@@ -2,14 +2,7 @@
 (function () {
   "use strict";
 
-  /* Base publica: pasta deste script no jsDelivr (eco-webdesign/newline). */
-  var FIT10_ASSETS_BASE = (function () {
-    var script = document.currentScript;
-    if (script && script.src) {
-      return script.src.replace(/[^\/]+$/, "");
-    }
-    return "https://cdn.jsdelivr.net/gh/eco-webdesign/newline@main/sistemas/fit10/";
-  })();
+  var FIT10_ASSETS_BASE = "assets/sistemas/fit10/";
   var GLB_NAME = "perfil-duo.glb";
 
   var steps = [
@@ -438,7 +431,268 @@
     return new URL(FIT10_ASSETS_BASE + GLB_NAME, document.baseURI).href;
   }
 
+  /* Scroll cue wave — port fiel da Orchestrated (canvas risco + flicks em loop). */
+  function initScrollCue() {
+    var wrap = document.getElementById("fit10ScrollCue");
+    var canvas = document.getElementById("fit10ScrollCueWave");
+    var hero = document.querySelector("#fit10Sistema .pdtHero");
+    if (!wrap || !canvas || !hero) return;
+
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    var CFG = {
+      speed: 85,
+      damping: 0.8,
+      spread: 0.12,
+      flickMin: 2.6,
+      flickMax: 5,
+      flickShort: 0.22,
+      flickLong: 0.42,
+      intervalMin: 1.5,
+      intervalMax: 2.8,
+      humps: 0.35,
+      lineWidth: 1.2,
+      alpha: 0.9,
+      trimDistance: 140,
+      fadeAt: 1,
+      backAt: 8,
+      hoverStrength: 0.3,
+      hoverMax: 5,
+      hoverReach: 40,
+      hoverWidth: 14,
+      hoverSpring: 220,
+      hoverDamping: 8
+    };
+
+    function randRange(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    var cssW = 0;
+    var cssH = 0;
+    var dpr = 1;
+    var offsets = new Float32Array(52);
+    var history = new Float32Array(960);
+    var histWrite = 0;
+    var flickTime = 0;
+    var nextFlickAt = 0.6;
+    var flick = { start: -1, length: 0.3, size: 0, hump: false };
+    var reveal = { low: 0, high: 1 };
+    var hidden = false;
+    var hover = { y: 0, offset: 0, velocity: 0, target: 0 };
+    var lastPointerX = null;
+    var lastTs = performance.now();
+    var rafId = 0;
+    var needsDraw = true;
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function resizeCanvas() {
+      cssW = canvas.clientWidth || 32;
+      cssH = canvas.clientHeight || 45;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.round(cssW * dpr));
+      canvas.height = Math.max(1, Math.round(cssH * dpr));
+    }
+
+    function flickSample() {
+      var e = (flickTime - flick.start) / flick.length;
+      if (flick.start < 0 || e >= 1 || e < 0) return 0;
+      var envelope = Math.sin(Math.PI * e);
+      if (flick.hump) return flick.size * envelope * envelope;
+      return flick.size * Math.sin(2 * Math.PI * e) * envelope;
+    }
+
+    function historyAt(age) {
+      var t = Math.min(histWrite - 1, histWrite - 1 - 240 * age);
+      if (t < 0 || t < histWrite - 960 + 1) return 0;
+      var i = Math.floor(t);
+      var a = history[i % 960];
+      var b = history[(i + 1) % 960];
+      return a + (b - a) * (t - i);
+    }
+
+    function rebuildOffsets() {
+      var step = cssH / 51;
+      var i;
+      for (i = 0; i < 52; i++) {
+        var age = (51 - i) * step / CFG.speed;
+        var spread = CFG.spread * age;
+        var sample;
+        if (spread > 1e-4) {
+          sample =
+            (historyAt(age - spread) +
+              2 * historyAt(age - spread / 2) +
+              2 * historyAt(age) +
+              2 * historyAt(age + spread / 2) +
+              historyAt(age + spread)) /
+            8;
+        } else {
+          sample = historyAt(age);
+        }
+        offsets[i] = sample * Math.exp(-CFG.damping * age);
+        if (hover.offset !== 0) {
+          var dy = i * step - hover.y;
+          var tip = Math.min(1, (51 - i) / 8);
+          offsets[i] +=
+            hover.offset *
+            Math.exp(-(dy * dy) / (2 * CFG.hoverWidth * CFG.hoverWidth)) *
+            tip;
+        }
+      }
+    }
+
+    function onPointerMove(ev) {
+      var prevX = lastPointerX;
+      lastPointerX = ev.clientX;
+      if (ev.pointerType !== "mouse" || prevX === null || hidden || reduced.matches) return;
+      var rect = canvas.getBoundingClientRect();
+      var dist = Math.abs(ev.clientX - (rect.left + rect.width / 2));
+      if (dist > CFG.hoverReach || ev.clientY < rect.top - 8 || ev.clientY > rect.bottom) return;
+      var strength = 1 - dist / CFG.hoverReach;
+      hover.y = ev.clientY - rect.top;
+      hover.target = Math.max(
+        -CFG.hoverMax,
+        Math.min(CFG.hoverMax, hover.target + (ev.clientX - prevX) * CFG.hoverStrength * strength)
+      );
+    }
+
+    function stepHover(dt) {
+      var remain = Math.min(dt, 0.05);
+      while (remain > 1e-6) {
+        var slice = Math.min(0.004166666666666667, remain);
+        hover.target *= Math.exp(-slice / 0.08);
+        hover.velocity +=
+          (CFG.hoverSpring * (hover.target - hover.offset) - CFG.hoverDamping * hover.velocity) *
+          slice;
+        hover.offset += hover.velocity * slice;
+        remain -= slice;
+      }
+      if (
+        Math.abs(hover.offset) < 0.005 &&
+        Math.abs(hover.velocity) < 0.05 &&
+        Math.abs(hover.target) < 0.005
+      ) {
+        hover.offset = 0;
+        hover.velocity = 0;
+        hover.target = 0;
+      }
+    }
+
+    function stepWave(dt) {
+      var remain = Math.min(dt, 0.05);
+      while (remain > 1e-6) {
+        var slice = Math.min(0.004166666666666667, remain);
+        flickTime += slice;
+        if (flickTime >= nextFlickAt) {
+          flick = {
+            start: flickTime,
+            length: randRange(CFG.flickShort, CFG.flickLong),
+            size: randRange(CFG.flickMin, CFG.flickMax) * (Math.random() < 0.5 ? -1 : 1),
+            hump: Math.random() < CFG.humps
+          };
+          nextFlickAt = flickTime + flick.length + randRange(CFG.intervalMin, CFG.intervalMax);
+        }
+        history[histWrite % 960] = flickSample();
+        histWrite += 1;
+        remain -= slice;
+      }
+      rebuildOffsets();
+    }
+
+    function draw() {
+      if (!ctx) return;
+      var mid = cssW / 2;
+      var step = cssH / 51;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssW, cssH);
+      var top = cssH * (1 - reveal.high);
+      var bottom = cssH * (1 - reveal.low);
+      if (bottom - top < 0.25) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, top, cssW, bottom - top);
+      ctx.clip();
+      ctx.globalAlpha = CFG.alpha;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = CFG.lineWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(mid + offsets[0], 0);
+      var i;
+      for (i = 1; i < 51; i++) {
+        var cx = mid + (offsets[i] + offsets[i + 1]) / 2;
+        var cy = (i + 0.5) * step;
+        ctx.quadraticCurveTo(mid + offsets[i], i * step, cx, cy);
+      }
+      ctx.lineTo(mid + offsets[51], cssH);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function updateVisibility() {
+      var heroRect = hero.getBoundingClientRect();
+      var scrolled = Math.max(0, -heroRect.top);
+      if (hidden) {
+        if (scrolled <= CFG.backAt) {
+          hidden = false;
+          reveal.high = 1;
+          wrap.classList.add("is-visible");
+          wrap.classList.remove("is-fading");
+        }
+        return;
+      }
+      reveal.low = Math.min(1, Math.max(0, scrolled / CFG.trimDistance));
+      if (reveal.low >= Math.min(CFG.fadeAt, 0.999)) {
+        hidden = true;
+        wrap.classList.add("is-fading");
+        wrap.classList.remove("is-visible");
+      } else {
+        wrap.classList.add("is-visible");
+        wrap.classList.remove("is-fading");
+      }
+    }
+
+    function tick(now) {
+      rafId = requestAnimationFrame(tick);
+      if (document.hidden) return;
+      var dt = (now - lastTs) / 1000;
+      lastTs = now;
+      updateVisibility();
+      if (hidden || reveal.high - reveal.low <= 0.001) {
+        if (needsDraw) {
+          draw();
+          needsDraw = false;
+        }
+        return;
+      }
+      needsDraw = true;
+      if (canvas.clientWidth !== cssW || canvas.clientHeight !== cssH) resizeCanvas();
+      if (!reduced.matches) {
+        stepHover(dt);
+        stepWave(dt);
+      } else {
+        offsets.fill(0);
+      }
+      draw();
+    }
+
+    resizeCanvas();
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("resize", resizeCanvas);
+    wrap.classList.add("is-visible");
+    rafId = requestAnimationFrame(tick);
+
+    return function destroy() {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }
+
   async function start() {
+    initScrollCue();
     renderCatalogs();
     setLoadHint("Carregando modelo 3D...");
 
