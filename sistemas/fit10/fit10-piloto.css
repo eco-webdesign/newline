@@ -346,7 +346,7 @@ button { font: inherit; }
 
 #fit10Sistema .pdtHero__nav a:hover { color: var(--accent); }
 
-/* Scroll cue (Orchestrated-style wave) — centralizado no banner */
+/* Scroll cue (Orchestrated-style wave), centralizado no banner */
 #fit10Sistema .pdtHero__scrollCue {
   position: absolute;
   left: 50%;

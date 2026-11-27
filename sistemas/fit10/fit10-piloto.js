@@ -431,7 +431,7 @@
     return new URL(FIT10_ASSETS_BASE + GLB_NAME, document.baseURI).href;
   }
 
-  /* Scroll cue wave — port fiel da Orchestrated (canvas risco + flicks em loop). */
+  /* Scroll cue wave: port fiel da Orchestrated (canvas risco + flicks em loop). */
   function initScrollCue() {
     var wrap = document.getElementById("fit10ScrollCue");
     var canvas = document.getElementById("fit10ScrollCueWave");
