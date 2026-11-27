@@ -527,6 +527,7 @@ button { font: inherit; }
 .fichaTec__row:last-child { border-bottom: 0; }
 
 .fichaTec__rowHead {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -543,6 +544,35 @@ button { font: inherit; }
 
 .fichaTec__rowHead:hover {
   background: rgba(23, 21, 21, 0.04);
+}
+
+/* Chevron circular (mesmo padrao da ficha de produto Newline) */
+.fichaTec__chevron {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  border: 1px solid rgba(23, 21, 21, 0.15);
+  border-radius: 50%;
+  color: inherit;
+  transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+.fichaTec__chevron svg { display: block; }
+
+.fichaTec__rowHead:hover .fichaTec__chevron {
+  background: rgba(23, 21, 21, 0.06);
+}
+
+.fichaTec__rowHead[aria-expanded="true"] .fichaTec__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fichaTec__chevron { transition: none; }
 }
 
 .fichaTec__rowMedia {
@@ -680,6 +710,14 @@ button { font: inherit; }
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
+    padding-right: 64px;
+  }
+
+  .fichaTec__chevron {
+    position: absolute;
+    right: 16px;
+    bottom: 14px;
+    margin-left: 0;
   }
 
   .fichaTec__family {

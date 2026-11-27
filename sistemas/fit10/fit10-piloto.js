@@ -331,7 +331,11 @@
       btn.setAttribute("aria-controls", vid + "_panel");
       btn.innerHTML =
         '<span class="fichaTec__rowMedia">' + item.mediaLabel + "</span>" +
-        '<span class="fichaTec__rowLabel">' + item.label + "</span>";
+        '<span class="fichaTec__rowLabel">' + item.label + "</span>" +
+        '<span class="fichaTec__chevron" aria-hidden="true">' +
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="none">' +
+        '<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+        "</svg></span>";
 
       var panel = document.createElement("div");
       panel.className = "fichaTec__rowPanel";
