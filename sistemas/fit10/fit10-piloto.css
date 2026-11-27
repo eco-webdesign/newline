@@ -183,66 +183,169 @@ button { font: inherit; }
 
 .fit10Top__nav a:hover { color: var(--nlStudioInk); }
 
-/* Hero */
-.fit10Hero {
-  padding: 48px 0 24px;
-}
-
-.fit10Hero__eyebrow {
-  margin: 0 0 10px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--nlStudioMuted);
-}
-
-.fit10Hero h1 {
-  margin: 0 0 14px;
-  font-size: clamp(32px, 5vw, 56px);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
-  color: var(--nlStudioInk);
-}
-
-.fit10Hero h1 em {
-  font-style: italic;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.fit10Hero__lead {
-  margin: 0;
-  max-width: 42ch;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.55;
-  color: var(--textMuted);
-}
-
-.fit10Phases {
-  list-style: none;
-  margin: 28px 0 0;
-  padding: 0;
+/* Banner no padrao da pagina de produto (.pdtHero) */
+#fit10Sistema .pdtHero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 30px 30px;
+  height: 100vh;
+  min-height: 560px;
   display: flex;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  padding-top: var(--headerH);
+  background: #333;
+  z-index: 1;
+  /* Cores claras fixas no banner (nao dependem do tema claro/escuro) */
+  --fit10HeroInk: #ffffff;
+  --fit10HeroMuted: rgba(255, 255, 255, 0.58);
+}
+
+#fit10Sistema .pdtHero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+#fit10Sistema .pdtHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.05) 45%, rgba(0, 0, 0, 0.15) 100%);
+  z-index: 1;
+}
+
+#fit10Sistema .pdtHero__inner {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 64px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+#fit10Sistema .pdtHero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+#fit10Sistema .pdtHero__title {
+  font-family: var(--fontBase);
+  font-weight: 300;
+  color: var(--fit10HeroInk);
+  font-size: 56px;
+  line-height: 1.1;
+  max-width: 760px;
+  text-align: right;
+  margin: 0 0 12px;
+}
+
+#fit10Sistema .pdtHero__titleLine { display: block; overflow: hidden; }
+#fit10Sistema .pdtHero__titleLineInner { display: block; }
+
+#fit10Sistema .pdtHero__brand {
+  margin: 6px 0 20px;
+  line-height: 0;
+  filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.55));
+}
+
+#fit10Sistema .pdtHero__brandMask { display: block; overflow: hidden; }
+
+#fit10Sistema .pdtHero__brand img {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 200px;
+}
+
+#fit10Sistema .pdtHero__line {
+  display: block;
+  width: 140px;
+  height: 1px;
+  background: var(--fit10HeroMuted);
+  margin-bottom: 18px;
+  opacity: 0.35;
+}
+
+#fit10Sistema .pdtHero__tag {
+  font-family: var(--fontBase);
+  font-weight: 300;
+  font-size: 24px;
+  color: var(--fit10HeroInk);
+  text-align: right;
+  margin: 0;
+}
+
+#fit10Sistema .pdtHero__bottomRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;
+}
+
+#fit10Sistema .pdtHero__breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
+  font-size: 14px;
+  color: var(--fit10HeroInk);
+  margin: 0;
+  flex-wrap: wrap;
 }
 
-.fit10Phases li {
-  padding: 8px 14px;
-  border: 1px solid var(--nlStudioLine);
-  background: var(--nlStudioCard);
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--nlStudioInk);
+#fit10Sistema .pdtHero__breadcrumb a {
+  color: var(--fit10HeroMuted);
+  font-weight: 300;
+  text-decoration: none;
 }
 
-.fit10Phases strong {
-  font-weight: 600;
-  color: var(--accent);
-  margin-right: 6px;
+#fit10Sistema .pdtHero__breadcrumb a:hover { color: var(--accent); }
+
+#fit10Sistema .pdtHero__breadcrumb span {
+  color: var(--fit10HeroInk);
+  font-weight: 300;
+}
+
+#fit10Sistema .pdtHero__breadcrumb span.pdtHero__breadcrumb--current { font-weight: 500; }
+
+#fit10Sistema .pdtHero__breadcrumb svg {
+  width: 6px;
+  height: 10px;
+  flex: none;
+  opacity: 0.6;
+}
+
+#fit10Sistema .pdtHero__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+#fit10Sistema .pdtHero__nav a {
+  font-family: var(--fontBase);
+  font-weight: 300;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: var(--fit10HeroMuted);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+#fit10Sistema .pdtHero__nav a:hover { color: var(--accent); }
+
+@media (max-width: 768px) {
+  #fit10Sistema .pdtHero { height: auto; min-height: 520px; }
+  #fit10Sistema .pdtHero__title { font-size: 34px; }
+  #fit10Sistema .pdtHero__nav { display: none; }
 }
 
 /* Stage 3D */
