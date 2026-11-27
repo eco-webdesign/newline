@@ -2,8 +2,10 @@
 (function () {
   "use strict";
 
-  var FIT10_ASSETS_BASE = "assets/sistemas/fit10/";
+  /* Absoluto no CDN: no Render Interago, baseURI relativa aponta para /App/Render/ e 404. */
+  var FIT10_ASSETS_BASE = "https://cdn.jsdelivr.net/gh/eco-webdesign/newline@main/sistemas/fit10/";
   var GLB_NAME = "perfil-duo.glb";
+  var FIT10_ASSETS_BASE_LOCAL = "assets/sistemas/fit10/";
 
   var steps = [
     { start: 0, end: 0.24, parts: [{ name: "Perfil_Duo", offset: [-0.12, 0, 0] }] },
@@ -424,11 +426,24 @@
     });
   }
 
+  function assetsBase() {
+    var host = location.hostname || "";
+    if (host === "127.0.0.1" || host === "localhost") {
+      return FIT10_ASSETS_BASE_LOCAL;
+    }
+    return FIT10_ASSETS_BASE;
+  }
+
   function glbUrl() {
     if (location.protocol === "file:" && Fit10Assets.modeloLocal) {
       return Fit10Assets.modeloLocal;
     }
-    return new URL(FIT10_ASSETS_BASE + GLB_NAME, document.baseURI).href;
+    var base = assetsBase();
+    /* CDN absoluto: nao resolver contra document.baseURI do Render. */
+    if (/^https?:\/\//i.test(base)) {
+      return base.replace(/\/?$/, "/") + GLB_NAME;
+    }
+    return new URL(base + GLB_NAME, document.baseURI).href;
   }
 
   /* Scroll cue wave: port fiel da Orchestrated (canvas risco + flicks em loop). */
