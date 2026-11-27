@@ -213,8 +213,12 @@ button { font: inherit; }
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.05) 45%, rgba(0, 0, 0, 0.15) 100%);
+  /* Overlay mais forte: base escura + gradiente de baixo pra cima (legibilidade do titulo/marca) */
+  background:
+    linear-gradient(0deg, rgba(17, 15, 15, 0.72) 0%, rgba(17, 15, 15, 0.28) 42%, rgba(17, 15, 15, 0.38) 100%),
+    linear-gradient(90deg, rgba(17, 15, 15, 0.18) 0%, rgba(17, 15, 15, 0) 55%);
   z-index: 1;
+  pointer-events: none;
 }
 
 #fit10Sistema .pdtHero__inner {
